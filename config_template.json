@@ -1,0 +1,10 @@
+{
+	"user":{
+		"name":"",
+		"username":""
+	},
+	"timeclock":{
+		"timeclockUrl":"http://timeclock/timeclock.php",
+		"timeclockReportUrl":"http://timeclock/reports/total_hours.php"
+	}
+}
