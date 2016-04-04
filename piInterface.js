@@ -1,9 +1,11 @@
 'use strict';
 
 var monitoredPins = {};//Holds callbacks for when pins change state
-var config = require('../config.js'),
-    _ = require('lodash'),
+var timeclock = require('./index.js'),
+    g = require('wiring-pi'),
     async = require('async');
+
+g.setup('gpio');
 
 //This monitores the pins held by the monitoredPins array checking them every 10 ms
 var inputInterval = setInterval(function(){
@@ -15,10 +17,8 @@ var inputInterval = setInterval(function(){
     }
 }, 10);
 
-//Okay, I admit this may be a bit of a custer to look at, but it is very flexable
-//Specify the pin the input is on, and specify a callback that fires every time the input pin state changes, giving the current value as an arg
-function digChange(pinConfig, funct){
-    var pin = +pinConfig.pin; //this is here to make sure nothing gets changed out of scope, although that should only happen if it is an obj
+function digChange(pin, funct){
+    var pin = +pin; //this is here to make sure nothing gets changed out of scope, although that should only happen if it is an obj
 
     //If the pin is already being monitored then just add to the list of callbacks
     if(monitoredPins[pin]){
@@ -27,20 +27,20 @@ function digChange(pinConfig, funct){
         //Here the pin is set to be an input by hardware, a var past is made to store the state last read by the software
         //a interval will come by and call inter giving the current state of the pin as input, that is compared with the past value
         //If they don't match, then the state must have changed, call all calbacks, then update the past var to the new val
-        config.gpio.pinMode(pin, config.gpio.INPUT);
-        pinConfig.val = +(+config.gpio.digitalRead(pin) === +!pinConfig.invVal);
+        g.pinMode(pin, g.INPUT);
+        var past = +g.digitalRead(pin);
         monitoredPins[pin] = {};
 
         //just feed this function with the pins current state and it will fire and update if it had changed
         monitoredPins[pin].inter = function(now){
-            now = +(+now === +!pinConfig.invVal); //this will inverse if invVal is true
+            now = +now; //this will inverse if invVal is true
 
-            if(now !== pinConfig.val){
+            if(now !== past){
                 for(var i = 0; i < monitoredPins[pin].functs.length; i++){
                     monitoredPins[pin].functs[i](now);
                 }
 
-                pinConfig.val = now;
+                past = now;
             }
         };
 
@@ -63,3 +63,109 @@ function digChange(pinConfig, funct){
         return funct;
     };
 }
+
+function outputSetup(pin){
+    pin = +pin;
+    var lastVal = 0;
+    g.pinMode(pin, g.OUTPUT);
+
+    return {
+        set: function(val){
+            lastVal = +val;
+            g.digitalWrite(pin, lastVal);
+        },
+        toggle: function(){
+            lastVal = !lastVal;
+            g.digitalWrite(pin, +lastVal);
+        }
+    };
+}
+
+function flashingLed(pin){
+    var output = outputSetup(pin);
+    var interval = false;
+
+    function clearItter(){
+        if(interval){
+            clearInterval(interval);
+            interval = false;
+        }
+    }
+
+    return {
+        pulse: function(rate){
+            clearItter();
+
+            interval = setInterval(function(){
+                output.toggle();
+            }, rate);
+        },
+        off: function(){
+            clearItter();
+            output.set(0);
+        },
+        on: function(){
+            clearItter();
+            output.set(1);
+        }
+    };
+}
+
+var statusLed = flashingLed(4);
+var connected = false;
+var connectionTesting = false;
+var pulseRate = 333;
+
+function setupConnection(){
+    if(connectionTesting){
+        return;
+    }
+
+    statusLed.pulse(pulseRate);
+
+    connectionTesting = setInterval(function(){
+       timeclock.test(function(val){
+           if(val){
+               connected = true;
+               statusLed.on();
+               clearInterval(connectionTesting);
+               connectionTesting = false;
+           }else{
+               connected = false;
+               statusLed.pulse(pulseRate);
+           }
+       })
+    }, 2000)
+}
+
+digChange(27, function(){
+    if(connected) {
+        timeclock.login(function (val) {
+            if (!val) {
+                setupConnection();
+            }
+        });
+    }
+});
+
+digChange(17, function(){
+    if(connected) {
+        timeclock.lunch(function (val) {
+            if (!val) {
+                setupConnection();
+            }
+        });
+    }
+});
+
+digChange(22, function(){
+    if(connected) {
+        timeclock.logout(function (val) {
+            if (!val) {
+                setupConnection();
+            }
+        });
+    }
+});
+
+setupConnection();
