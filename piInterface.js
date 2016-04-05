@@ -31,8 +31,6 @@ function digChange(pin, funct){
 
         //just feed this function with the pins current state and it will fire and update if it had changed
         monitoredPins[pin].inter = function(now){
-            now = +now; //this will inverse if invVal is true
-            console.log(now);
             if(now !== past){
                 for(var i = 0; i < monitoredPins[pin].functs.length; i++){
                     monitoredPins[pin].functs[i](now);
@@ -137,7 +135,7 @@ function setupConnection(){
     }, 2000)
 }
 
-digChange(2, function(){
+digChange(3, function(){
     console.log('Dig change, Login');
 
     if(connected && !inProgress) {
@@ -154,7 +152,7 @@ digChange(2, function(){
     }
 });
 
-digChange(3, function(){
+digChange(2, function(){
     console.log('Dig change, lunch');
 
     if(connected && !inProgress) {
@@ -171,7 +169,7 @@ digChange(3, function(){
     }
 });
 
-digChange(22, function(){
+digChange(15, function(){
     console.log('Dig change, logout');
 
     if(connected && !inProgress) {
