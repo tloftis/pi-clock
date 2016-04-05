@@ -113,6 +113,7 @@ var statusLed = flashingLed(4);
 var connected = false;
 var connectionTesting = false;
 var pulseRate = 333;
+var inProgress = false;
 
 function setupConnection(){
     if(connectionTesting){
@@ -136,11 +137,16 @@ function setupConnection(){
     }, 2000)
 }
 
-digChange(27, function(){
+digChange(2, function(){
     console.log('Dig change, Login');
 
-    if(connected) {
+    if(connected && !inProgress) {
+        inProgress = true;
+        console.log('Login');
+
         timeclock.login(function (val) {
+            inProgress = false;
+
             if (!val) {
                 setupConnection();
             }
@@ -148,11 +154,16 @@ digChange(27, function(){
     }
 });
 
-digChange(17, function(){
+digChange(3, function(){
     console.log('Dig change, lunch');
 
-    if(connected) {
+    if(connected && !inProgress) {
+        inProgress = true;
+        console.log('Lunch');
+
         timeclock.lunch(function (val) {
+            inProgress = false;
+
             if (!val) {
                 setupConnection();
             }
@@ -163,8 +174,13 @@ digChange(17, function(){
 digChange(22, function(){
     console.log('Dig change, logout');
 
-    if(connected) {
+    if(connected && !inProgress) {
+        inProgress = true;
+        console.log('Logout');
+
         timeclock.logout(function (val) {
+            inProgress = false;
+
             if (!val) {
                 setupConnection();
             }
