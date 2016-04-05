@@ -139,7 +139,7 @@ function setupConnection(){
 digChange(3, function(){
     if(connected && !inProgress) {
         inProgress = true;
-        statusLed.pulse(pulseRate);
+        statusLed.pulse(200);
         console.log('Login');
 
         timeclock.login(function (val) {
@@ -157,7 +157,7 @@ digChange(3, function(){
 digChange(2, function(){
     if(connected && !inProgress) {
         inProgress = true;
-        statusLed.pulse(pulseRate);
+        statusLed.pulse(200);
         console.log('Lunch');
 
         timeclock.lunch(function (val) {
@@ -175,7 +175,7 @@ digChange(2, function(){
 digChange(15, function(){
     if(connected && !inProgress) {
         inProgress = true;
-        statusLed.pulse(pulseRate);
+        statusLed.pulse(200);
         console.log('Logout');
 
         timeclock.logout(function (val) {
