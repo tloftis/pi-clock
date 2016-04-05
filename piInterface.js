@@ -118,6 +118,7 @@ function setupConnection(){
         return;
     }
 
+    connected = false;
     statusLed.pulse(pulseRate);
 
     connectionTesting = setInterval(function(){
@@ -136,10 +137,9 @@ function setupConnection(){
 }
 
 digChange(3, function(){
-    console.log('Dig change, Login');
-
     if(connected && !inProgress) {
         inProgress = true;
+        statusLed.pulse(pulseRate);
         console.log('Login');
 
         timeclock.login(function (val) {
@@ -147,16 +147,17 @@ digChange(3, function(){
 
             if (!val) {
                 setupConnection();
+            }else{
+                statusLed.on(pulseRate);
             }
         });
     }
 });
 
 digChange(2, function(){
-    console.log('Dig change, lunch');
-
     if(connected && !inProgress) {
         inProgress = true;
+        statusLed.pulse(pulseRate);
         console.log('Lunch');
 
         timeclock.lunch(function (val) {
@@ -164,16 +165,17 @@ digChange(2, function(){
 
             if (!val) {
                 setupConnection();
+            }else{
+                statusLed.on(pulseRate);
             }
         });
     }
 });
 
 digChange(15, function(){
-    console.log('Dig change, logout');
-
     if(connected && !inProgress) {
         inProgress = true;
+        statusLed.pulse(pulseRate);
         console.log('Logout');
 
         timeclock.logout(function (val) {
@@ -181,6 +183,8 @@ digChange(15, function(){
 
             if (!val) {
                 setupConnection();
+            }else{
+                statusLed.on(pulseRate);
             }
         });
     }
