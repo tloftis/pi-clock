@@ -1,13 +1,3 @@
-var moment = require("moment"),
-    request = require('request'),
-    path = require('path'),
-    cheerio = require('cheerio'),
-    config = require('./config');
-
-var upperLim = 150;
-var fullName = config.user.name;
-var userName = config.user.name;
-
 function sendNewStat(stat, callback) {
     if(stat != 'lunch'){
         setTimeout(function(){

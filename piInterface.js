@@ -1,7 +1,7 @@
 'use strict';
 
 var monitoredPins = {};//Holds callbacks for when pins change state
-var timeclock = require('./index.js'),
+var timeclock = require('./index-fake.js'),
     g = require('wiring-pi'),
     async = require('async');
 
@@ -13,7 +13,7 @@ var inputInterval = setInterval(function(){
 
     //The key is the pin number
     for(key in monitoredPins){
-        monitoredPins[key].inter(config.gpio.digitalRead(+key));
+        monitoredPins[key].inter(g.digitalRead(+key));
     }
 }, 10);
 
@@ -34,7 +34,7 @@ function digChange(pin, funct){
         //just feed this function with the pins current state and it will fire and update if it had changed
         monitoredPins[pin].inter = function(now){
             now = +now; //this will inverse if invVal is true
-
+            console.log(now);
             if(now !== past){
                 for(var i = 0; i < monitoredPins[pin].functs.length; i++){
                     monitoredPins[pin].functs[i](now);
@@ -139,6 +139,8 @@ function setupConnection(){
 }
 
 digChange(27, function(){
+    console.log('Dig change, Login');
+
     if(connected) {
         timeclock.login(function (val) {
             if (!val) {
@@ -149,6 +151,8 @@ digChange(27, function(){
 });
 
 digChange(17, function(){
+    console.log('Dig change, lunch');
+
     if(connected) {
         timeclock.lunch(function (val) {
             if (!val) {
@@ -159,6 +163,8 @@ digChange(17, function(){
 });
 
 digChange(22, function(){
+    console.log('Dig change, logout');
+
     if(connected) {
         timeclock.logout(function (val) {
             if (!val) {
