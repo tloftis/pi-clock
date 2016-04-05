@@ -9,16 +9,14 @@ g.setup('gpio');
 
 //This monitores the pins held by the monitoredPins array checking them every 10 ms
 var inputInterval = setInterval(function(){
-    var key;
-
     //The key is the pin number
-    for(key in monitoredPins){
+    for(var key in monitoredPins){
         monitoredPins[key].inter(g.digitalRead(+key));
     }
-}, 10);
+}, 25);
 
 function digChange(pin, funct){
-    var pin = +pin; //this is here to make sure nothing gets changed out of scope, although that should only happen if it is an obj
+    pin = +pin; //this is here to make sure nothing gets changed out of scope, although that should only happen if it is an obj
 
     //If the pin is already being monitored then just add to the list of callbacks
     if(monitoredPins[pin]){
@@ -28,8 +26,8 @@ function digChange(pin, funct){
         //a interval will come by and call inter giving the current state of the pin as input, that is compared with the past value
         //If they don't match, then the state must have changed, call all calbacks, then update the past var to the new val
         g.pinMode(pin, g.INPUT);
-        var past = +g.digitalRead(pin);
         monitoredPins[pin] = {};
+        var past = +g.digitalRead(pin);
 
         //just feed this function with the pins current state and it will fire and update if it had changed
         monitoredPins[pin].inter = function(now){
